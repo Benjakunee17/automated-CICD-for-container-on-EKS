@@ -20,7 +20,7 @@ spec:
       serviceAccountName: my-app-sa
       containers:
         - name: my-app
-          image: 017820697088.dkr.ecr.ap-southeast-1.amazonaws.com/myapp
+          image: 017820697088.dkr.ecr.ap-southeast-1.amazonaws.com/myapp:latest
           ports:
             - containerPort: 8080
           envFrom:
