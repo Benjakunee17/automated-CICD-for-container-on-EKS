@@ -1,0 +1,28 @@
+version: 0.2
+
+env:
+  variables:
+    ECR_REPO: "017820697088.dkr.ecr.ap-southeast-1.amazonaws.com/myapp"
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to ECR...
+      - aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin $ECR_REPO
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      - echo Building Docker image...
+      - docker build -t $ECR_REPO:$COMMIT_HASH .
+      - docker tag $ECR_REPO:$COMMIT_HASH $ECR_REPO:latest
+  post_build:
+    commands:
+      - echo Pushing image to ECR...
+      - docker push $ECR_REPO:$COMMIT_HASH
+      - docker push $ECR_REPO:latest
+      - printf '[{"name":"my-app","imageUri":"%s"}]' $ECR_REPO:$COMMIT_HASH > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
+    - k8s/**/*
