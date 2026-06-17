@@ -1,5 +1,4 @@
 version: 0.2
-
 phases:
   install:
     commands:
@@ -7,8 +6,10 @@ phases:
       - chmod +x kubectl && mv kubectl /usr/local/bin/
   pre_build:
     commands:
-      - aws eks update-kubeconfig --name my-cluster --region ap-southeast-1
+      - aws eks update-kubeconfig --name demo-cluster --region ap-southeast-1
   build:
     commands:
-      - kubectl set image deployment/my-app my-app=$(jq -r '.[0].imageUri' imagedefinitions.json) -n default
+      - IMAGE_URI=$(jq -r '.[0].imageUri' imagedefinitions.json)
+      - echo "Deploying image: $IMAGE_URI"
+      - kubectl set image deployment/my-app my-app=$IMAGE_URI -n default
       - kubectl rollout status deployment/my-app -n default
